@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum roles {
+  administrator
+  employee
+}
+
+model users {
+  id        Int        @id @default(autoincrement())
+  full_name String
+  email     String     @unique
+  role      roles
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  tasks     tasks[]
+  UserTask  UserTask[]
+}
+
+model tasks {
+  id          Int           @id @default(autoincrement())
+  task_name   String        @unique
+  description String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  users       users[]
+  task_status task_status[]
+  UserTask    UserTask[]
+}
+
+model UserTask {
+  id     Int @id @default(autoincrement())
+  userId Int
+  taskId Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user users @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task tasks @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+enum status {
+  todo
+  in_progrers
+  blocked
+  in_review
+  done
+}
+
+model task_status {
+  id     Int    @id @default(autoincrement())
+  taskId Int
+  status status
+
+  updatedAt DateTime @updatedAt
+  task      tasks    @relation(fields: [taskId], references: [id])
+}
